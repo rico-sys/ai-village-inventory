@@ -3,17 +3,60 @@
 // 管理者側 - ダッシュボード
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/neumorphic'
 import { Item } from '@/types/database'
-import { LayoutDashboard, Package, Users, FileText, AlertTriangle } from 'lucide-react'
 
 interface DashboardStats {
   todayRequests: number
   activeRequests: number
   lowStockItems: Item[]
 }
+
+type MenuItem = {
+  title: string
+  icon: string
+  href: string
+  description: string
+  bgVar: string
+  inkVar: string
+}
+
+const menuItems: MenuItem[] = [
+  {
+    title: '物品管理',
+    icon: '📦',
+    href: '/admin/items',
+    description: '物品の追加・編集・削除',
+    bgVar: 'var(--customer-bg)',
+    inkVar: 'var(--customer-ink)',
+  },
+  {
+    title: 'カテゴリ管理',
+    icon: '🗂️',
+    href: '/admin/categories',
+    description: 'カテゴリの追加・編集',
+    bgVar: 'var(--staff-bg)',
+    inkVar: 'var(--staff-ink)',
+  },
+  {
+    title: 'スタッフ管理',
+    icon: '👥',
+    href: '/admin/staff',
+    description: 'スタッフの追加・編集',
+    bgVar: 'var(--admin-bg)',
+    inkVar: 'var(--admin-ink)',
+  },
+  {
+    title: 'ログ閲覧',
+    icon: '📜',
+    href: '/admin/logs',
+    description: '全トランザクションログ',
+    bgVar: '#FFF4E0',
+    inkVar: '#B25C2C',
+  },
+]
 
 export default function AdminDashboardPage() {
   const router = useRouter()
@@ -32,7 +75,6 @@ export default function AdminDashboardPage() {
     try {
       const supabase = createClient()
 
-      // 本日の申請数
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
@@ -41,29 +83,21 @@ export default function AdminDashboardPage() {
         .select('*', { count: 'exact', head: true })
         .gte('requested_at', today.toISOString())
 
-      // 貸出中の申請数
       const { count: activeCount } = await supabase
         .from('requests')
         .select('*', { count: 'exact', head: true })
         .in('status', ['pending', 'delivered', 'return_requested'])
 
-      // 低在庫アラート
-      const { data: lowStockData } = await supabase
-        .from('items')
-        .select('*')
-        .gt('low_stock_alert', 0)
-        .lte('current_stock', supabase.rpc('items.low_stock_alert'))
-        .order('current_stock', { ascending: true })
-
-      // 低在庫の条件を手動でフィルタ（Supabaseの制限のため）
       const { data: allItems } = await supabase
         .from('items')
         .select('*')
         .gt('low_stock_alert', 0)
 
-      const lowStock = allItems?.filter(
+      const lowStock = (allItems || []).filter(
+        // @ts-ignore - Supabase generated types issue
         (item) => item.current_stock <= item.low_stock_alert
-      ) || []
+      // @ts-ignore - Supabase generated types issue
+      ) as Item[]
 
       setStats({
         todayRequests: todayCount || 0,
@@ -77,130 +111,138 @@ export default function AdminDashboardPage() {
     }
   }
 
-  const menuItems = [
-    {
-      title: '物品管理',
-      icon: Package,
-      href: '/admin/items',
-      description: '物品の追加・編集・削除',
-    },
-    {
-      title: 'カテゴリ管理',
-      icon: LayoutDashboard,
-      href: '/admin/categories',
-      description: 'カテゴリの管理',
-    },
-    {
-      title: 'スタッフ管理',
-      icon: Users,
-      href: '/admin/staff',
-      description: 'スタッフの追加・編集',
-    },
-    {
-      title: 'ログ閲覧',
-      icon: FileText,
-      href: '/admin/logs',
-      description: '全トランザクションログ',
-    },
-  ]
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-neu-bg flex items-center justify-center">
-        <div className="text-neu-text">読み込み中...</div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-neu-bg py-6 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen w-full px-5 py-8">
+      <div className="mx-auto w-full max-w-[720px] pb-20">
+
         {/* ヘッダー */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-neu-text mb-2">管理ダッシュボード</h1>
-          <p className="text-sm text-neu-text-muted">
-            システム全体の状況を確認できます
-          </p>
-        </div>
+        <header className="mb-6 flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-lg"
+            style={{ background: 'var(--bg-alt)', color: 'var(--text)' }}
+            aria-label="トップへ戻る"
+          >
+            ‹
+          </Link>
+          <div>
+            <h1 className="text-xl font-bold tracking-wide">管理ダッシュボード</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              システム全体の状況を確認できます
+            </p>
+          </div>
+        </header>
 
         {/* 統計カード */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>本日の申請数</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-neu-accent">
-                {stats.todayRequests}
-              </p>
-              <p className="text-sm text-neu-text-muted mt-2">件</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>現在貸出中</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-neu-accent">
-                {stats.activeRequests}
-              </p>
-              <p className="text-sm text-neu-text-muted mt-2">件</p>
-            </CardContent>
-          </Card>
-        </div>
+        <section className="surface-card relative mb-6 overflow-hidden px-5 py-5">
+          <div
+            className="absolute left-0 right-0 top-0 h-[3px]"
+            style={{ background: 'var(--brand-gradient-h)' }}
+          />
+          <div className="mb-1 flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+            <span>📊</span>
+            <span>本日のサマリー</span>
+          </div>
+          <div className="mb-4 text-base font-bold">
+            {loading ? '読み込み中...' : '在庫状況を確認しましょう'}
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <StatCard num={loading ? '—' : String(stats.todayRequests)} label="本日の申請" tone="info" />
+            <StatCard num={loading ? '—' : String(stats.activeRequests)} label="貸出中"     tone="ok" />
+            <StatCard num={loading ? '—' : String(stats.lowStockItems.length)} label="補充必要" tone="alert" />
+          </div>
+        </section>
 
         {/* 低在庫アラート */}
-        {stats.lowStockItems.length > 0 && (
-          <Card className="mb-8 bg-orange-50">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <AlertTriangle size={20} className="text-orange-600" />
-                <CardTitle>低在庫アラート</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {stats.lowStockItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between items-center p-2 bg-white rounded-lg"
+        {!loading && stats.lowStockItems.length > 0 && (
+          <section
+            className="surface-card mb-6 px-5 py-4"
+            style={{ background: '#FFF8F0' }}
+          >
+            <div className="mb-2 flex items-center gap-2 text-sm font-bold" style={{ color: '#B25C2C' }}>
+              <span>⚠️</span>
+              <span>低在庫アラート</span>
+            </div>
+            <ul className="space-y-2">
+              {stats.lowStockItems.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center justify-between rounded-xl bg-white px-3 py-2"
+                >
+                  <span className="font-medium">{item.name}</span>
+                  <span
+                    className="pill"
+                    style={{ background: '#FFE4D0', color: '#B25C2C' }}
                   >
-                    <span className="text-neu-text font-medium">{item.name}</span>
-                    <Badge variant="warning" size="sm">
-                      残り {item.current_stock}個
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                    残り {item.current_stock}個
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
-        {/* メニュー */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {menuItems.map((item) => (
-            <Card
-              key={item.href}
-              className="cursor-pointer hover:scale-[1.02] transition-transform active:scale-[0.98]"
-              onClick={() => router.push(item.href)}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-neu-bg neu-concave flex items-center justify-center flex-shrink-0">
-                  <item.icon size={24} className="text-neu-accent" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-neu-text mb-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-neu-text-muted">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ))}
+        {/* セクションタイトル */}
+        <div className="mx-1 mb-3 text-[13px] font-medium" style={{ color: 'var(--text-muted)' }}>
+          管理メニュー
         </div>
+
+        {/* メニュー */}
+        <nav className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.href}
+              onClick={() => router.push(item.href)}
+              className="surface-card surface-card-hover flex items-center gap-4 p-5 text-left"
+            >
+              <div
+                className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-[16px] text-[26px]"
+                style={{ background: item.bgVar }}
+                aria-hidden="true"
+              >
+                {item.icon}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="mb-1 text-base font-bold tracking-wide">
+                  {item.title}
+                </h3>
+                <p className="text-[12px] leading-snug" style={{ color: 'var(--text-muted)' }}>
+                  {item.description}
+                </p>
+              </div>
+              <div
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm"
+                style={{ background: 'var(--bg-alt)', color: 'var(--text)' }}
+                aria-hidden="true"
+              >
+                ›
+              </div>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  )
+}
+
+type StatTone = 'info' | 'ok' | 'alert'
+
+function StatCard({ num, label, tone }: { num: string; label: string; tone: StatTone }) {
+  const colorVar =
+    tone === 'info'  ? 'var(--brand-blue)'  :
+    tone === 'ok'    ? 'var(--brand-green)' :
+                       'var(--danger)'
+
+  return (
+    <div
+      className="rounded-2xl px-3 py-3.5 text-center"
+      style={{ background: 'var(--bg-alt)' }}
+    >
+      <div className="text-2xl font-bold leading-none" style={{ color: colorVar }}>
+        {num}
+      </div>
+      <div className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+        {label}
       </div>
     </div>
   )
