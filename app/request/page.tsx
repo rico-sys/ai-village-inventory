@@ -2,12 +2,14 @@
 
 // お客さん側 - 申請画面
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Package, ShoppingCart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button, Card, Input, Tabs, Stepper, Badge } from '@/components/neumorphic'
 import { ItemWithCategory } from '@/types/database'
+
+export const dynamic = 'force-dynamic'
 
 interface CartItem {
   itemId: string
@@ -16,7 +18,7 @@ interface CartItem {
   currentStock: number
 }
 
-export default function RequestPage() {
+function RequestPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [items, setItems] = useState<ItemWithCategory[]>([])
@@ -226,5 +228,18 @@ export default function RequestPage() {
         )}
       </div>
     </div>
+  )
+}
+
+
+export default function RequestPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neu-bg flex items-center justify-center">
+        <div className="text-neu-text">読み込み中...</div>
+      </div>
+    }>
+      <RequestPageContent />
+    </Suspense>
   )
 }

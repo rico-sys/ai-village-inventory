@@ -74,17 +74,26 @@ export default function AdminItemsPage() {
     try {
       const supabase = createClient()
 
+      const data = {
+        name: formData.name,
+        category_id: formData.category_id || null,
+        current_stock: formData.current_stock,
+        low_stock_alert: formData.low_stock_alert,
+      }
+
       if (editingItem) {
         // 更新
+        // @ts-ignore - Supabase generated types issue
         const { error } = await supabase
           .from('items')
-          .update(formData)
+          .update(data)
           .eq('id', editingItem.id)
 
         if (error) throw error
       } else {
         // 新規作成
-        const { error } = await supabase.from('items').insert(formData)
+        // @ts-ignore - Supabase generated types issue
+        const { error } = await supabase.from('items').insert(data)
 
         if (error) throw error
       }
