@@ -4,10 +4,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card } from '@/components/neumorphic'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Staff } from '@/types/database'
-import { Inbox, PackagePlus, PackageMinus, PackageCheck, User } from 'lucide-react'
 
 export default function StaffHomePage() {
   const router = useRouter()
@@ -95,8 +94,8 @@ export default function StaffHomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neu-bg flex items-center justify-center">
-        <div className="text-neu-text">読み込み中...</div>
+      <div className="min-h-screen w-full px-5 py-8 flex items-center justify-center">
+        <div style={{ color: 'var(--text-muted)' }}>読み込み中...</div>
       </div>
     )
   }
@@ -107,77 +106,112 @@ export default function StaffHomePage() {
 
   const menuItems = [
     {
-      title: '📥 申請キュー',
+      title: '申請キュー',
       description: 'お客さんからの申請を確認',
-      icon: Inbox,
+      icon: '📥',
       href: '/staff/queue',
       badge: pendingCount > 0 ? pendingCount : undefined,
+      bgVar: 'var(--customer-bg)',
+      inkVar: 'var(--customer-ink)',
     },
     {
-      title: '📦 借りる',
+      title: '借りる',
       description: 'スタッフ自身が備品を借りる',
-      icon: PackagePlus,
+      icon: '📦',
       href: '/staff/borrow',
+      bgVar: 'var(--staff-bg)',
+      inkVar: 'var(--staff-ink)',
     },
     {
-      title: '📤 返す',
+      title: '返す',
       description: 'スタッフ自身が備品を返却',
-      icon: PackageMinus,
+      icon: '📤',
       href: '/staff/return',
+      bgVar: 'var(--admin-bg)',
+      inkVar: 'var(--admin-ink)',
     },
     {
-      title: '🔄 消耗品補充',
+      title: '消耗品補充',
       description: '消耗品の在庫を補充',
-      icon: PackageCheck,
+      icon: '🔄',
       href: '/staff/restock',
+      bgVar: '#FFF4E0',
+      inkVar: '#B25C2C',
     },
   ]
 
   return (
-    <div className="min-h-screen bg-neu-bg py-6 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen w-full px-5 py-8">
+      <div className="mx-auto w-full max-w-[720px] pb-20">
+
         {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-neu-text mb-2">スタッフメニュー</h1>
-          <div className="flex items-center justify-center gap-2 text-neu-text-muted">
-            <User size={16} />
-            <span className="text-sm">{staff.name}</span>
-          </div>
-          <button
-            onClick={handleChangeStaff}
-            className="text-xs text-neu-accent hover:underline mt-1"
+        <header className="mb-6 flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-lg"
+            style={{ background: 'var(--bg-alt)', color: 'var(--text)' }}
+            aria-label="トップへ戻る"
           >
-            スタッフを変更
-          </button>
-        </div>
+            ‹
+          </Link>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold tracking-wide">スタッフメニュー</h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                👤 {staff.name}
+              </span>
+              <button
+                onClick={handleChangeStaff}
+                className="text-xs"
+                style={{ color: 'var(--brand-blue)' }}
+              >
+                変更
+              </button>
+            </div>
+          </div>
+        </header>
 
         {/* メニュー */}
-        <div className="grid gap-4">
+        <nav className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {menuItems.map((item) => (
-            <Card
+            <button
               key={item.href}
-              className="cursor-pointer hover:scale-[1.02] transition-transform active:scale-[0.98]"
               onClick={() => router.push(item.href)}
+              className="surface-card surface-card-hover flex items-center gap-4 p-5 text-left relative"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-neu-bg neu-concave flex items-center justify-center flex-shrink-0">
-                  <item.icon size={24} className="text-neu-accent" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-bold text-neu-text">{item.title}</h3>
-                    {item.badge !== undefined && (
-                      <span className="bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-neu-text-muted">{item.description}</p>
-                </div>
+              <div
+                className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-[16px] text-[26px]"
+                style={{ background: item.bgVar }}
+                aria-hidden="true"
+              >
+                {item.icon}
               </div>
-            </Card>
+              <div className="min-w-0 flex-1">
+                <h3 className="mb-1 text-base font-bold tracking-wide">
+                  {item.title}
+                </h3>
+                <p className="text-[12px] leading-snug" style={{ color: 'var(--text-muted)' }}>
+                  {item.description}
+                </p>
+              </div>
+              {item.badge !== undefined && (
+                <div
+                  className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{ background: 'var(--danger)' }}
+                >
+                  {item.badge}
+                </div>
+              )}
+              <div
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm"
+                style={{ background: 'var(--bg-alt)', color: 'var(--text)' }}
+                aria-hidden="true"
+              >
+                ›
+              </div>
+            </button>
           ))}
-        </div>
+        </nav>
       </div>
     </div>
   )
