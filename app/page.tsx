@@ -76,31 +76,6 @@ export default function Home() {
           <TodayBadge />
         </header>
 
-        {/* ステータスダッシュボード */}
-        <section
-          className="surface-card relative mb-7 overflow-hidden px-5 py-5"
-        >
-          <div
-            className="absolute left-0 right-0 top-0 h-[3px]"
-            style={{ background: 'var(--brand-gradient-h)' }}
-          />
-          <div
-            className="mb-1 flex items-center gap-1.5 text-xs"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            <span>📍</span>
-            <span>本日のサマリー</span>
-          </div>
-          <div className="mb-4 text-base font-bold">
-            在庫状況は良好です
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <StatCard num="128" label="登録備品" tone="info" />
-            <StatCard num="14"  label="貸出中"   tone="ok" />
-            <StatCard num="3"   label="補充必要" tone="alert" />
-          </div>
-        </section>
-
         {/* セクションタイトル */}
         <div
           className="mx-1 mb-3 text-[13px] font-medium"
@@ -170,44 +145,6 @@ export default function Home() {
         >
           © 2026 AI Village. Built with Next.js + Supabase
         </footer>
-      </div>
-    </div>
-  )
-}
-
-type StatTone = 'info' | 'ok' | 'alert' | 'neutral'
-
-function StatCard({
-  num,
-  label,
-  tone = 'neutral',
-}: {
-  num: string
-  label: string
-  tone?: StatTone
-}) {
-  const colorVar =
-    tone === 'info'  ? 'var(--brand-blue)'  :
-    tone === 'ok'    ? 'var(--brand-green)' :
-    tone === 'alert' ? 'var(--danger)'      :
-                       'var(--text)'
-
-  return (
-    <div
-      className="rounded-2xl px-3 py-3.5 text-center"
-      style={{ background: 'var(--bg-alt)' }}
-    >
-      <div
-        className="text-2xl font-bold leading-none"
-        style={{ color: colorVar }}
-      >
-        {num}
-      </div>
-      <div
-        className="mt-1 text-[11px]"
-        style={{ color: 'var(--text-muted)' }}
-      >
-        {label}
       </div>
     </div>
   )
