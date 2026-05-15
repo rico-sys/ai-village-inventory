@@ -4,10 +4,10 @@ import { QrCode, Users, Settings } from 'lucide-react'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-neu-bg flex items-center justify-center py-16 px-4">
-      <div className="max-w-6xl w-full">
+    <div className="min-h-screen bg-neu-bg flex items-center justify-center py-20 px-6">
+      <div className="max-w-7xl w-full">
         {/* ヘッダー */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <div className="inline-block mb-6">
             <div className="w-20 h-20 rounded-3xl bg-neu-bg neu-convex flex items-center justify-center">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
@@ -24,11 +24,11 @@ export default function Home() {
         </div>
 
         {/* メニューカード */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* お客さん用 */}
           <Link href="/request" className="group">
             <Card className="cursor-pointer neu-hover h-full">
-              <div className="text-center py-10 px-6">
+              <div className="text-center py-12 px-8">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-neu-bg neu-concave flex items-center justify-center group-hover:neu-flat transition-all duration-300">
                   <QrCode size={36} className="text-indigo-600" />
                 </div>
@@ -49,7 +49,7 @@ export default function Home() {
           {/* スタッフ用 */}
           <Link href="/staff" className="group">
             <Card className="cursor-pointer neu-hover h-full">
-              <div className="text-center py-10 px-6">
+              <div className="text-center py-12 px-8">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-neu-bg neu-concave flex items-center justify-center group-hover:neu-flat transition-all duration-300">
                   <Users size={36} className="text-purple-600" />
                 </div>
@@ -70,7 +70,7 @@ export default function Home() {
           {/* 管理者用 */}
           <Link href="/admin" className="group">
             <Card className="cursor-pointer neu-hover h-full">
-              <div className="text-center py-10 px-6">
+              <div className="text-center py-12 px-8">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-neu-bg neu-concave flex items-center justify-center group-hover:neu-flat transition-all duration-300">
                   <Settings size={36} className="text-pink-600" />
                 </div>
@@ -90,7 +90,7 @@ export default function Home() {
         </div>
 
         {/* フッター */}
-        <div className="text-center mt-16">
+        <div className="text-center mt-20">
           <p className="text-xs text-neu-text-muted">
             © 2026 AI Village. Built with Next.js + Supabase
           </p>

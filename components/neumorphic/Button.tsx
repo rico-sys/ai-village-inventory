@@ -28,9 +28,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     // サイズ
     const sizeStyles = {
-      sm: 'px-5 py-2.5 text-sm min-h-[40px]',
-      md: 'px-7 py-3.5 text-base min-h-[48px]',
-      lg: 'px-9 py-4 text-lg min-h-[56px]',
+      sm: 'px-6 py-3 text-sm min-h-[44px]',
+      md: 'px-8 py-4 text-base min-h-[52px]',
+      lg: 'px-10 py-5 text-lg min-h-[60px]',
     }
 
     // バリアント
