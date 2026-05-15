@@ -9,8 +9,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Item } from '@/types/database'
 
 interface DashboardStats {
-  todayRequests: number
-  activeRequests: number
   lowStockItems: Item[]
 }
 
@@ -61,8 +59,6 @@ const menuItems: MenuItem[] = [
 export default function AdminDashboardPage() {
   const router = useRouter()
   const [stats, setStats] = useState<DashboardStats>({
-    todayRequests: 0,
-    activeRequests: 0,
     lowStockItems: [],
   })
   const [loading, setLoading] = useState(true)
@@ -74,19 +70,6 @@ export default function AdminDashboardPage() {
   const fetchStats = async () => {
     try {
       const supabase = createClient()
-
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-
-      const { count: todayCount } = await supabase
-        .from('requests')
-        .select('*', { count: 'exact', head: true })
-        .gte('requested_at', today.toISOString())
-
-      const { count: activeCount } = await supabase
-        .from('requests')
-        .select('*', { count: 'exact', head: true })
-        .in('status', ['pending', 'delivered', 'return_requested'])
 
       const { data: allItems } = await supabase
         .from('items')
@@ -100,8 +83,6 @@ export default function AdminDashboardPage() {
       ) as Item[]
 
       setStats({
-        todayRequests: todayCount || 0,
-        activeRequests: activeCount || 0,
         lowStockItems: lowStock,
       })
     } catch (error) {
@@ -132,26 +113,6 @@ export default function AdminDashboardPage() {
             </p>
           </div>
         </header>
-
-        {/* 統計カード */}
-        <section className="surface-card relative mb-6 overflow-hidden px-5 py-5">
-          <div
-            className="absolute left-0 right-0 top-0 h-[3px]"
-            style={{ background: 'var(--brand-gradient-h)' }}
-          />
-          <div className="mb-1 flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-            <span>📊</span>
-            <span>本日のサマリー</span>
-          </div>
-          <div className="mb-4 text-base font-bold">
-            {loading ? '読み込み中...' : '在庫状況を確認しましょう'}
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <StatCard num={loading ? '—' : String(stats.todayRequests)} label="本日の申請" tone="info" />
-            <StatCard num={loading ? '—' : String(stats.activeRequests)} label="貸出中"     tone="ok" />
-            <StatCard num={loading ? '—' : String(stats.lowStockItems.length)} label="補充必要" tone="alert" />
-          </div>
-        </section>
 
         {/* 低在庫アラート */}
         {!loading && stats.lowStockItems.length > 0 && (
@@ -220,29 +181,6 @@ export default function AdminDashboardPage() {
             </button>
           ))}
         </nav>
-      </div>
-    </div>
-  )
-}
-
-type StatTone = 'info' | 'ok' | 'alert'
-
-function StatCard({ num, label, tone }: { num: string; label: string; tone: StatTone }) {
-  const colorVar =
-    tone === 'info'  ? 'var(--brand-blue)'  :
-    tone === 'ok'    ? 'var(--brand-green)' :
-                       'var(--danger)'
-
-  return (
-    <div
-      className="rounded-2xl px-3 py-3.5 text-center"
-      style={{ background: 'var(--bg-alt)' }}
-    >
-      <div className="text-2xl font-bold leading-none" style={{ color: colorVar }}>
-        {num}
-      </div>
-      <div className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
-        {label}
       </div>
     </div>
   )
