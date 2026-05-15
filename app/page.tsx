@@ -9,10 +9,8 @@ export default function Home() {
         {/* ヘッダー */}
         <div className="text-center mb-20">
           <div className="inline-block mb-6">
-            <div className="w-20 h-20 rounded-3xl bg-neu-bg neu-convex flex items-center justify-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <Settings size={32} className="text-white" />
-              </div>
+            <div className="w-20 h-20 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg">
+              <Settings size={36} className="text-white" />
             </div>
           </div>
           <h1 className="text-5xl font-bold text-neu-text mb-4 tracking-tight">
@@ -29,7 +27,7 @@ export default function Home() {
           <Link href="/request" className="group">
             <Card className="cursor-pointer neu-hover h-full">
               <div className="text-center py-12 px-8">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-neu-bg neu-concave flex items-center justify-center group-hover:neu-flat transition-all duration-300">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-all duration-300 border border-indigo-100">
                   <QrCode size={36} className="text-indigo-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-neu-text mb-3">
@@ -50,7 +48,7 @@ export default function Home() {
           <Link href="/staff" className="group">
             <Card className="cursor-pointer neu-hover h-full">
               <div className="text-center py-12 px-8">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-neu-bg neu-concave flex items-center justify-center group-hover:neu-flat transition-all duration-300">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-all duration-300 border border-purple-100">
                   <Users size={36} className="text-purple-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-neu-text mb-3">
@@ -71,7 +69,7 @@ export default function Home() {
           <Link href="/admin" className="group">
             <Card className="cursor-pointer neu-hover h-full">
               <div className="text-center py-12 px-8">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-neu-bg neu-concave flex items-center justify-center group-hover:neu-flat transition-all duration-300">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-pink-50 flex items-center justify-center group-hover:bg-pink-100 transition-all duration-300 border border-pink-100">
                   <Settings size={36} className="text-pink-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-neu-text mb-3">

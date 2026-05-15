@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ecf0f3;
-  --foreground: #2c3e50;
-  --bg: #ecf0f3;
-  --text: #2c3e50;
-  --text-muted: #6b7c93;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --bg: #fafafa;
+  --text: #1a1a1a;
+  --text-muted: #737373;
   --accent: #6366f1;
   --accent-hover: #4f46e5;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
   --shadow-light: #ffffff;
-  --shadow-dark: rgba(163, 177, 198, 0.35);
-  --border-radius: 1.5rem;
+  --shadow-dark: rgba(0, 0, 0, 0.08);
+  --border-radius: 1rem;
+  --border-color: #e5e5e5;
 }
 
 @theme inline {
@@ -38,41 +39,34 @@ body {
   padding: 0;
 }
 
-/* ニューモーフィック基本クラス - より洗練されたデザイン */
+/* モダンなフラットデザイン */
 .neu-convex {
-  box-shadow:
-    8px 8px 20px var(--shadow-dark),
-    -8px -8px 20px var(--shadow-light);
+  background: white;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .neu-concave {
-  box-shadow:
-    inset 4px 4px 12px var(--shadow-dark),
-    inset -4px -4px 12px var(--shadow-light);
+  background: #f9fafb;
+  border: 1px solid var(--border-color);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .neu-flat {
-  box-shadow:
-    3px 3px 8px var(--shadow-dark),
-    -3px -3px 8px var(--shadow-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ホバー効果 */
 .neu-hover:hover {
-  box-shadow:
-    10px 10px 24px var(--shadow-dark),
-    -10px -10px 24px var(--shadow-light);
-  transform: translateY(-1px);
+  border-color: #d4d4d4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 /* アクティブ状態 */
 .neu-button:active,
 .neu-pressed {
-  box-shadow:
-    inset 3px 3px 8px var(--shadow-dark),
-    inset -3px -3px 8px var(--shadow-light);
   transform: scale(0.98);
 }

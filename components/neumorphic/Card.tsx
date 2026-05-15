@@ -9,7 +9,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, padding = 'md', children, ...props }, ref) => {
-    const baseStyles = 'bg-neu-bg rounded-3xl neu-convex transition-all duration-300'
+    const baseStyles = 'bg-white rounded-2xl neu-convex transition-all duration-300'
 
     const paddingStyles = {
       none: '',

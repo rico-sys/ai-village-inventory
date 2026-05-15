@@ -13,12 +13,12 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, ...props }, ref) => {
     const baseStyles =
-      'w-full px-6 py-4 bg-neu-bg text-neu-text rounded-2xl neu-concave focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-neu-bg transition-all duration-300 placeholder:text-neu-text-muted/50 text-base'
+      'w-full px-6 py-4 bg-white text-neu-text rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400 text-base'
 
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-base font-semibold text-neu-text mb-3">
+          <label className="block text-base font-semibold text-gray-700 mb-3">
             {label}
           </label>
         )}

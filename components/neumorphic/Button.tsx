@@ -24,7 +24,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseStyles = 'neu-button transition-all duration-300 font-semibold rounded-2xl flex items-center justify-center gap-2'
+    const baseStyles = 'neu-button transition-all duration-200 font-semibold rounded-xl flex items-center justify-center gap-2 border'
 
     // サイズ
     const sizeStyles = {
@@ -35,11 +35,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     // バリアント
     const variantStyles = {
-      primary: 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]',
-      secondary: 'bg-neu-bg text-neu-text-muted neu-convex hover:neu-hover active:neu-pressed',
-      success: 'bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]',
-      warning: 'bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]',
-      danger: 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]',
+      primary: 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600 hover:border-indigo-700 shadow-sm hover:shadow-md active:scale-[0.98]',
+      secondary: 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 shadow-sm hover:shadow-md active:scale-[0.98]',
+      success: 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 hover:border-emerald-700 shadow-sm hover:shadow-md active:scale-[0.98]',
+      warning: 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 shadow-sm hover:shadow-md active:scale-[0.98]',
+      danger: 'bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 shadow-sm hover:shadow-md active:scale-[0.98]',
     }
 
     const disabledStyles = 'opacity-50 cursor-not-allowed pointer-events-none'

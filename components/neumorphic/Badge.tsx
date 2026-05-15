@@ -10,20 +10,20 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant = 'default', size = 'md', children, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-full shadow-sm'
+    const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg'
 
     const sizeStyles = {
       sm: 'px-2.5 py-1 text-xs',
-      md: 'px-3.5 py-1.5 text-sm',
-      lg: 'px-4.5 py-2 text-base',
+      md: 'px-3 py-1.5 text-sm',
+      lg: 'px-4 py-2 text-base',
     }
 
     const variantStyles = {
-      default: 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700',
-      success: 'bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-700',
-      warning: 'bg-gradient-to-br from-amber-100 to-amber-200 text-amber-700',
-      danger: 'bg-gradient-to-br from-rose-100 to-rose-200 text-rose-700',
-      info: 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700',
+      default: 'bg-gray-100 text-gray-700 border border-gray-200',
+      success: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+      warning: 'bg-amber-50 text-amber-700 border border-amber-200',
+      danger: 'bg-red-50 text-red-700 border border-red-200',
+      info: 'bg-blue-50 text-blue-700 border border-blue-200',
     }
 
     return (
