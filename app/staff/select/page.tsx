@@ -4,10 +4,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Staff } from '@/types/database'
-import { Card } from '@/components/neumorphic'
-import { User, Check } from 'lucide-react'
 
 export default function StaffSelectPage() {
   const router = useRouter()
@@ -46,67 +45,91 @@ export default function StaffSelectPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neu-bg flex items-center justify-center">
-        <div className="text-neu-text">読み込み中...</div>
+      <div className="min-h-screen w-full px-5 py-8 flex items-center justify-center">
+        <div style={{ color: 'var(--text-muted)' }}>読み込み中...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neu-bg py-6 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen w-full px-5 py-8">
+      <div className="mx-auto w-full max-w-[720px] pb-20">
+
         {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-neu-text mb-2">スタッフ選択</h1>
-          <p className="text-sm text-neu-text-muted">
-            あなたの名前を選択してください
-          </p>
-        </div>
+        <header className="mb-6 flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-lg"
+            style={{ background: 'var(--bg-alt)', color: 'var(--text)' }}
+            aria-label="トップへ戻る"
+          >
+            ‹
+          </Link>
+          <div>
+            <h1 className="text-xl font-bold tracking-wide">スタッフ選択</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              あなたの名前を選択してください
+            </p>
+          </div>
+        </header>
 
         {/* スタッフ一覧 */}
-        <div className="grid gap-4 mb-6">
-          {staffList.map((staff) => (
-            <Card
-              key={staff.id}
-              className="cursor-pointer hover:scale-[1.02] transition-transform active:scale-[0.98]"
-              onClick={() => handleSelectStaff(staff)}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-neu-bg neu-concave flex items-center justify-center flex-shrink-0">
-                  <User size={24} className="text-neu-accent" />
+        {staffList.length === 0 ? (
+          <div className="surface-card px-5 py-10 text-center" style={{ color: 'var(--text-muted)' }}>
+            スタッフが登録されていません
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 mb-6">
+            {staffList.map((staff) => (
+              <button
+                key={staff.id}
+                onClick={() => handleSelectStaff(staff)}
+                className="surface-card surface-card-hover flex items-center gap-4 px-5 py-4 text-left"
+              >
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-bold"
+                  style={{
+                    background: 'var(--staff-bg)',
+                    color: 'var(--staff-ink)',
+                  }}
+                  aria-hidden="true"
+                >
+                  {staff.name.slice(0, 1)}
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-neu-text">{staff.name}</h3>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold">{staff.name}</h3>
                   {staff.email && (
-                    <p className="text-sm text-neu-text-muted">{staff.email}</p>
+                    <p className="mt-0.5 text-[12px]" style={{ color: 'var(--text-muted)' }}>
+                      {staff.email}
+                    </p>
                   )}
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm"
+                  style={{ background: 'var(--bg-alt)', color: 'var(--text)' }}
+                  aria-hidden="true"
+                >
+                  ›
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* デバイス記憶オプション */}
-        <Card>
+        <div className="surface-card px-5 py-4">
           <label className="flex items-center gap-3 cursor-pointer">
-            <div
-              className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
-                rememberDevice
-                  ? 'bg-neu-accent'
-                  : 'bg-neu-bg neu-concave'
-              }`}
-              onClick={(e) => {
-                e.preventDefault()
-                setRememberDevice(!rememberDevice)
-              }}
-            >
-              {rememberDevice && <Check size={16} className="text-white" />}
-            </div>
-            <span className="text-sm text-neu-text">
+            <input
+              type="checkbox"
+              checked={rememberDevice}
+              onChange={(e) => setRememberDevice(e.target.checked)}
+              className="h-5 w-5 cursor-pointer accent-[var(--brand-green)]"
+            />
+            <span className="text-sm">
               このデバイスに記憶する（次回から選択をスキップ）
             </span>
           </label>
-        </Card>
+        </div>
       </div>
     </div>
   )
