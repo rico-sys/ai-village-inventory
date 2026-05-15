@@ -1,20 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-  --bg: #fafafa;
-  --text: #1a1a1a;
-  --text-muted: #737373;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --shadow-light: #ffffff;
-  --shadow-dark: rgba(0, 0, 0, 0.08);
-  --border-radius: 1rem;
-  --border-color: #e5e5e5;
+  /* 温かみのあるベース色 */
+  --background: #FAF8F3;
+  --foreground: #2C3E5C;
+  --bg: #F5F3EE;
+  --text: #2C3E5C;
+  --text-muted: #8B8478;
+
+  /* メインアクセント */
+  --accent: #2C3E5C;
+  --accent-hover: #1E2A4A;
+
+  /* カテゴリカラー（パステル） */
+  --mint: #D4E9E2;
+  --mint-dark: #9ABFB0;
+  --peach: #F5DED3;
+  --peach-dark: #E8B5A0;
+  --lavender: #E8DFF5;
+  --lavender-dark: #C9B3E0;
+
+  /* 状態カラー */
+  --success: #A8C5A4;
+  --warning: #F4D09D;
+  --danger: #E8B5A0;
+
+  /* 影とボーダー */
+  --shadow-soft: 0 1px 2px rgba(30, 42, 74, 0.04), 0 4px 16px rgba(30, 42, 74, 0.06);
+  --shadow-medium: 0 2px 4px rgba(30, 42, 74, 0.06), 0 8px 24px rgba(30, 42, 74, 0.08);
+  --shadow-strong: 0 4px 8px rgba(30, 42, 74, 0.08), 0 12px 32px rgba(30, 42, 74, 0.12);
+  --border-color: #E8E5DF;
 }
 
 @theme inline {
@@ -27,7 +42,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-noto-sans-jp), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -39,34 +54,35 @@ body {
   padding: 0;
 }
 
-/* モダンなフラットデザイン */
+/* ソフトUI（ニューモーフィズム）デザイン */
 .neu-convex {
-  background: white;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--background);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .neu-concave {
-  background: #f9fafb;
-  border: 1px solid var(--border-color);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 2px 2px 6px rgba(139, 132, 120, 0.1),
+              inset -2px -2px 6px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .neu-flat {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--background);
+  box-shadow: var(--shadow-medium);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ホバー効果 */
+/* ホバー効果 - より柔らかく */
 .neu-hover:hover {
-  border-color: #d4d4d4;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-strong);
+  transform: translateY(-4px);
 }
 
 /* アクティブ状態 */
 .neu-button:active,
 .neu-pressed {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: var(--shadow-soft);
 }

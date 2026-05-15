@@ -24,22 +24,22 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseStyles = 'neu-button transition-all duration-200 font-semibold rounded-xl flex items-center justify-center gap-2 border'
+    const baseStyles = 'neu-button transition-all duration-300 font-bold rounded-2xl flex items-center justify-center gap-2'
 
-    // サイズ
+    // サイズ - スマホで押しやすい大きめサイズ
     const sizeStyles = {
-      sm: 'px-6 py-3 text-sm min-h-[44px]',
-      md: 'px-8 py-4 text-base min-h-[52px]',
-      lg: 'px-10 py-5 text-lg min-h-[60px]',
+      sm: 'px-8 py-4 text-sm min-h-[48px]',
+      md: 'px-10 py-5 text-base min-h-[56px]',
+      lg: 'px-12 py-6 text-lg min-h-[64px]',
     }
 
-    // バリアント
+    // バリアント - ソフトUIスタイル
     const variantStyles = {
-      primary: 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600 hover:border-indigo-700 shadow-sm hover:shadow-md active:scale-[0.98]',
-      secondary: 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400 shadow-sm hover:shadow-md active:scale-[0.98]',
-      success: 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 hover:border-emerald-700 shadow-sm hover:shadow-md active:scale-[0.98]',
-      warning: 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 shadow-sm hover:shadow-md active:scale-[0.98]',
-      danger: 'bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 shadow-sm hover:shadow-md active:scale-[0.98]',
+      primary: 'bg-[#2C3E5C] hover:bg-[#1E2A4A] text-white shadow-[0_2px_4px_rgba(30,42,74,0.06),0_8px_24px_rgba(30,42,74,0.08)] hover:shadow-[0_4px_8px_rgba(30,42,74,0.08),0_12px_32px_rgba(30,42,74,0.12)] active:scale-[0.97]',
+      secondary: 'bg-[var(--background)] hover:bg-[#F0EDE7] text-[#2C3E5C] shadow-[0_1px_2px_rgba(30,42,74,0.04),0_4px_16px_rgba(30,42,74,0.06)] hover:shadow-[0_2px_4px_rgba(30,42,74,0.06),0_8px_24px_rgba(30,42,74,0.08)] active:scale-[0.97]',
+      success: 'bg-[#A8C5A4] hover:bg-[#92B58E] text-[#2C3E5C] shadow-[0_2px_4px_rgba(30,42,74,0.06),0_8px_24px_rgba(30,42,74,0.08)] hover:shadow-[0_4px_8px_rgba(30,42,74,0.08),0_12px_32px_rgba(30,42,74,0.12)] active:scale-[0.97]',
+      warning: 'bg-[#F4D09D] hover:bg-[#EEC080] text-[#2C3E5C] shadow-[0_2px_4px_rgba(30,42,74,0.06),0_8px_24px_rgba(30,42,74,0.08)] hover:shadow-[0_4px_8px_rgba(30,42,74,0.08),0_12px_32px_rgba(30,42,74,0.12)] active:scale-[0.97]',
+      danger: 'bg-[#E8B5A0] hover:bg-[#E09F86] text-white shadow-[0_2px_4px_rgba(30,42,74,0.06),0_8px_24px_rgba(30,42,74,0.08)] hover:shadow-[0_4px_8px_rgba(30,42,74,0.08),0_12px_32px_rgba(30,42,74,0.12)] active:scale-[0.97]',
     }
 
     const disabledStyles = 'opacity-50 cursor-not-allowed pointer-events-none'
