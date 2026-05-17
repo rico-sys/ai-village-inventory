@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button, Card, Input, Modal, Badge } from '@/components/neumorphic'
 import { ItemWithCategory, Category } from '@/types/database'
-import { ArrowLeft, Plus, Edit, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Edit, Trash2, Search } from 'lucide-react'
 
 export default function AdminItemsPage() {
   const router = useRouter()
@@ -16,6 +16,8 @@ export default function AdminItemsPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingItem, setEditingItem] = useState<ItemWithCategory | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [formData, setFormData] = useState({
     name: '',
     category_id: '',
@@ -115,11 +117,52 @@ export default function AdminItemsPage() {
 
       if (error) throw error
       fetchData()
+      setSelectedIds([])
     } catch (error) {
       console.error('削除エラー:', error)
       alert('削除に失敗しました')
     }
   }
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) {
+      alert('削除する物品を選択してください')
+      return
+    }
+
+    if (!confirm(`選択した${selectedIds.length}件の物品を削除しますか？`)) return
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from('items').delete().in('id', selectedIds)
+
+      if (error) throw error
+      fetchData()
+      setSelectedIds([])
+    } catch (error) {
+      console.error('一括削除エラー:', error)
+      alert('一括削除に失敗しました')
+    }
+  }
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredItems.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filteredItems.map((item) => item.id))
+    }
+  }
+
+  const handleSelectItem = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    )
+  }
+
+  // 検索フィルタリング
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   if (loading) {
     return (
@@ -146,33 +189,92 @@ export default function AdminItemsPage() {
           </Button>
         </div>
 
+        {/* 検索バー */}
+        <div className="mb-4">
+          <div className="relative">
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-neu-text-muted"
+              size={20}
+            />
+            <input
+              type="text"
+              placeholder="物品名で検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-neu-bg text-neu-text rounded-2xl neu-concave focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {/* アクションバー */}
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedIds.length === filteredItems.length && filteredItems.length > 0}
+                onChange={handleSelectAll}
+                className="w-5 h-5 rounded cursor-pointer"
+              />
+              <span className="text-sm text-neu-text">全選択</span>
+            </label>
+            {selectedIds.length > 0 && (
+              <span className="text-sm text-neu-text-muted">
+                {selectedIds.length}件選択中
+              </span>
+            )}
+          </div>
+          {selectedIds.length > 0 && (
+            <Button variant="danger" size="sm" onClick={handleBulkDelete}>
+              <Trash2 size={16} className="mr-2" />
+              選択を削除
+            </Button>
+          )}
+        </div>
+
         {/* 物品一覧 */}
         <div className="space-y-3">
-          {items.map((item) => (
-            <Card key={item.id}>
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-neu-text">{item.name}</h3>
-                    <Badge variant="default" size="sm">
-                      {item.category?.name}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-neu-text-muted">
-                    在庫: {item.current_stock}個 / アラート閾値: {item.low_stock_alert}個
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => handleEdit(item)}>
-                    <Edit size={16} />
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(item.id)}>
-                    <Trash2 size={16} />
-                  </Button>
-                </div>
-              </div>
+          {filteredItems.length === 0 ? (
+            <Card>
+              <p className="text-center text-neu-text-muted py-8">
+                {searchQuery ? '検索結果がありません' : '物品がありません'}
+              </p>
             </Card>
-          ))}
+          ) : (
+            filteredItems.map((item) => (
+              <Card key={item.id}>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(item.id)}
+                    onChange={() => handleSelectItem(item.id)}
+                    className="w-5 h-5 rounded cursor-pointer flex-shrink-0"
+                  />
+                  <div className="flex items-center justify-between flex-1">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-neu-text">{item.name}</h3>
+                        <Badge variant="default" size="sm">
+                          {item.category?.name}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-neu-text-muted">
+                        在庫: {item.current_stock}個 / アラート閾値: {item.low_stock_alert}個
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="secondary" size="sm" onClick={() => handleEdit(item)}>
+                        <Edit size={16} />
+                      </Button>
+                      <Button variant="danger" size="sm" onClick={() => handleDelete(item.id)}>
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* 編集モーダル */}
