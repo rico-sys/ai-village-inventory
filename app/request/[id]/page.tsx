@@ -3,7 +3,7 @@
 // お客さん側 - ステータス画面
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/neumorphic'
 import { notifyReturnRequest } from '@/lib/slack'
@@ -13,6 +13,7 @@ import { Package, Clock, CheckCircle2, RotateCcw, Check } from 'lucide-react'
 
 export default function RequestStatusPage() {
   const params = useParams()
+  const router = useRouter()
   const [request, setRequest] = useState<RequestWithItems | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
@@ -205,6 +206,9 @@ export default function RequestStatusPage() {
           deliveredAt: new Date(request.delivered_at),
         })
       }
+
+      // 貸出申請画面にリダイレクト
+      router.push(`/request?seat=${encodeURIComponent(request.seat_number)}`)
     } catch (error) {
       console.error('返却依頼エラー:', error)
       alert('返却依頼に失敗しました')
@@ -281,6 +285,9 @@ export default function RequestStatusPage() {
           deliveredAt: new Date(request.delivered_at),
         })
       }
+
+      // 貸出申請画面にリダイレクト
+      router.push(`/request?seat=${encodeURIComponent(request.seat_number)}`)
     } catch (error) {
       console.error('返却依頼エラー:', error)
       alert('返却依頼に失敗しました')
