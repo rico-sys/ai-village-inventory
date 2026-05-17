@@ -143,6 +143,33 @@ export default function RequestStatusPage() {
     try {
       const supabase = createClient()
 
+      // 対象の物品情報を取得
+      const item = request.request_items.find((ri) => ri.id === requestItemId)
+      if (!item || !item.item) {
+        throw new Error('物品が見つかりません')
+      }
+
+      // 在庫を戻す
+      const { error: stockError } = await supabase
+        .from('items')
+        .update({
+          current_stock: item.item.current_stock + item.quantity,
+        })
+        .eq('id', item.item.id)
+
+      if (stockError) throw stockError
+
+      // トランザクション記録（返却）
+      await supabase.from('transactions').insert({
+        item_id: item.item.id,
+        action: 'in',
+        quantity: item.quantity,
+        actor_type: 'visitor',
+        visitor_name: request.visitor_name,
+        request_item_id: item.id,
+        note: `${request.visitor_name} 様が返却依頼`,
+      })
+
       // request_itemの状態を更新
       const { error } = await supabase
         .from('request_items')
@@ -169,7 +196,6 @@ export default function RequestStatusPage() {
       }
 
       // Slack通知
-      const item = request.request_items.find((ri) => ri.id === requestItemId)
       if (item && item.item && request.delivered_at) {
         await notifyReturnRequest({
           visitorName: request.visitor_name,
@@ -201,6 +227,30 @@ export default function RequestStatusPage() {
       )
 
       for (const item of deliveredItems) {
+        if (!item.item) continue
+
+        // 在庫を戻す
+        const { error: stockError } = await supabase
+          .from('items')
+          .update({
+            current_stock: item.item.current_stock + item.quantity,
+          })
+          .eq('id', item.item.id)
+
+        if (stockError) throw stockError
+
+        // トランザクション記録（返却）
+        await supabase.from('transactions').insert({
+          item_id: item.item.id,
+          action: 'in',
+          quantity: item.quantity,
+          actor_type: 'visitor',
+          visitor_name: request.visitor_name,
+          request_item_id: item.id,
+          note: `${request.visitor_name} 様が返却依頼`,
+        })
+
+        // 状態を更新
         await supabase
           .from('request_items')
           .update({ item_status: 'return_requested' })
