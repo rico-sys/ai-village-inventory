@@ -9,7 +9,7 @@ import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@/compo
 import { notifyReturnRequest } from '@/lib/slack'
 import { RequestWithItems, RequestItemWithItem } from '@/types/database'
 import { getStatusLabel, getStatusColor, formatDate } from '@/lib/utils'
-import { Package, Clock, CheckCircle2, RotateCcw, Check } from 'lucide-react'
+import { Package, Clock, CheckCircle2, RotateCcw } from 'lucide-react'
 
 export default function RequestStatusPage() {
   const params = useParams()
@@ -91,31 +91,6 @@ export default function RequestStatusPage() {
       console.error('申請取得エラー:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  // 受取確認
-  const handleReceived = async (requestItemId: string) => {
-    if (!request) return
-
-    setActionLoading(true)
-    try {
-      const supabase = createClient()
-
-      // request_itemのreceived_atを更新
-      const { error } = await supabase
-        .from('request_items')
-        .update({
-          received_at: new Date().toISOString(),
-        })
-        .eq('id', requestItemId)
-
-      if (error) throw error
-    } catch (error) {
-      console.error('受取確認エラー:', error)
-      alert('受取確認に失敗しました')
-    } finally {
-      setActionLoading(false)
     }
   }
 
@@ -351,12 +326,6 @@ export default function RequestStatusPage() {
                       <div className="text-sm text-neu-text-muted">
                         数量: {requestItem.quantity}
                       </div>
-                      {requestItem.received_at && (
-                        <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                          <Check size={14} />
-                          受取済み（{formatDate(requestItem.received_at)}）
-                        </div>
-                      )}
                     </div>
                     <Badge
                       variant={
@@ -374,23 +343,8 @@ export default function RequestStatusPage() {
                     </Badge>
                   </div>
 
-                  {/* 受取確認ボタン */}
-                  {requestItem.item_status === 'delivered' && !requestItem.received_at && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      fullWidth
-                      onClick={() => handleReceived(requestItem.id)}
-                      disabled={actionLoading}
-                      className="mb-2"
-                    >
-                      <Check size={16} className="mr-2" />
-                      受取済み
-                    </Button>
-                  )}
-
                   {/* 個別返却ボタン */}
-                  {requestItem.item_status === 'delivered' && requestItem.received_at && (
+                  {requestItem.item_status === 'delivered' && (
                     <Button
                       variant="secondary"
                       size="sm"
