@@ -328,13 +328,37 @@ export default function AdminItemsPage() {
               </select>
             </div>
 
+            {editingItem && (
+              <div className="p-4 rounded-2xl bg-neu-bg-alt">
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-neu-text-muted">在庫総数</span>
+                    <span className="font-bold text-neu-text">
+                      {formData.current_stock + (rentalCounts[editingItem.id] || 0)}個
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neu-text-muted">在庫残数</span>
+                    <span className="font-bold text-neu-text">{formData.current_stock}個</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neu-text-muted">貸出中</span>
+                    <span className="font-bold text-neu-text">
+                      {rentalCounts[editingItem.id] || 0}個
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <Input
-              label="現在の在庫"
+              label="在庫残数"
               type="number"
               value={formData.current_stock.toString()}
               onChange={(e) =>
                 setFormData({ ...formData, current_stock: parseInt(e.target.value) || 0 })
               }
+              helperText="手元にある在庫の数を入力してください"
             />
           </div>
         </Modal>
