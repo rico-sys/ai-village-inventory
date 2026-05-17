@@ -9,7 +9,7 @@ import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@/compo
 import { notifyReturnRequest } from '@/lib/slack'
 import { RequestWithItems, RequestItemWithItem } from '@/types/database'
 import { getStatusLabel, getStatusColor, formatDate } from '@/lib/utils'
-import { Package, Clock, CheckCircle2, RotateCcw } from 'lucide-react'
+import { Package, Clock, CheckCircle2, RotateCcw, Check } from 'lucide-react'
 
 export default function RequestStatusPage() {
   const params = useParams()
@@ -91,6 +91,47 @@ export default function RequestStatusPage() {
       console.error('申請取得エラー:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 個別物品の受取確認
+  const handleReceived = async (requestItemId: string) => {
+    if (!request) return
+
+    setActionLoading(true)
+    try {
+      const supabase = createClient()
+
+      // request_itemの状態を更新
+      const { error } = await supabase
+        .from('request_items')
+        .update({
+          item_status: 'delivered',
+          received_at: new Date().toISOString(),
+        })
+        .eq('id', requestItemId)
+
+      if (error) throw error
+
+      // 申請全体の状態も確認して更新
+      const allDelivered = request.request_items.every(
+        (item) => item.id === requestItemId || item.item_status === 'delivered' || item.item_status === 'returned'
+      )
+
+      if (allDelivered) {
+        await supabase
+          .from('requests')
+          .update({
+            status: 'delivered',
+            delivered_at: new Date().toISOString(),
+          })
+          .eq('id', requestId)
+      }
+    } catch (error) {
+      console.error('受取確認エラー:', error)
+      alert('受取確認に失敗しました')
+    } finally {
+      setActionLoading(false)
     }
   }
 
@@ -342,6 +383,20 @@ export default function RequestStatusPage() {
                       {getStatusLabel(requestItem.item_status)}
                     </Badge>
                   </div>
+
+                  {/* 受取確認ボタン */}
+                  {requestItem.item_status === 'pending' && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      fullWidth
+                      onClick={() => handleReceived(requestItem.id)}
+                      disabled={actionLoading}
+                    >
+                      <Check size={16} className="mr-2" />
+                      受取済み
+                    </Button>
+                  )}
 
                   {/* 個別返却ボタン */}
                   {requestItem.item_status === 'delivered' && (
