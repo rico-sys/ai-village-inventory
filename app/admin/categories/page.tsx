@@ -19,6 +19,15 @@ const TYPE_COLOR: Record<CategoryType, { bg: string; ink: string }> = {
   consumable: { bg: 'var(--staff-bg)',    ink: 'var(--staff-ink)' },
 }
 
+// 選択可能な絵文字リスト
+const EMOJI_OPTIONS = [
+  '📦', '🔁', '🧴', '📝', '✏️', '📚', '💻', '🖥️', '⌨️', '🖱️',
+  '📱', '🔌', '🔋', '💡', '🔧', '🔨', '⚙️', '🛠️', '📎', '📌',
+  '📍', '✂️', '📏', '📐', '🖊️', '🖍️', '📄', '📃', '📋', '🗂️',
+  '🗃️', '📁', '📂', '🗄️', '📰', '🗞️', '📑', '🔖', '🏷️', '💼',
+  '👔', '🎒', '🛍️', '🎁', '🎀', '🎨', '🖼️', '🎭', '🎪', '🎬'
+]
+
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,9 +35,10 @@ export default function AdminCategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [formData, setFormData] = useState<{ name: string; type: CategoryType }>({
+  const [formData, setFormData] = useState<{ name: string; type: CategoryType; emoji: string }>({
     name: '',
     type: 'rental',
+    emoji: '📦',
   })
   const [saving, setSaving] = useState(false)
 
@@ -54,13 +64,13 @@ export default function AdminCategoriesPage() {
 
   const openAdd = () => {
     setEditingId(null)
-    setFormData({ name: '', type: 'rental' })
+    setFormData({ name: '', type: 'rental', emoji: '📦' })
     setShowModal(true)
   }
 
   const openEdit = (c: Category) => {
     setEditingId(c.id)
-    setFormData({ name: c.name, type: c.type })
+    setFormData({ name: c.name, type: c.type, emoji: c.emoji || '📦' })
     setShowModal(true)
   }
 
@@ -72,7 +82,11 @@ export default function AdminCategoriesPage() {
     setSaving(true)
     try {
       const supabase = createClient()
-      const payload = { name: formData.name.trim(), type: formData.type }
+      const payload = {
+        name: formData.name.trim(),
+        type: formData.type,
+        emoji: formData.emoji
+      }
 
       if (editingId) {
         // @ts-ignore - Supabase generated types issue
@@ -252,7 +266,7 @@ export default function AdminCategoriesPage() {
                     style={{ background: color.bg }}
                     aria-hidden="true"
                   >
-                    {c.type === 'rental' ? '🔁' : '🧴'}
+                    {c.emoji || (c.type === 'rental' ? '🔁' : '🧴')}
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-bold">{c.name}</h3>
@@ -338,6 +352,26 @@ export default function AdminCategoriesPage() {
                     </button>
                   )
                 })}
+              </div>
+
+              <label className="mb-2 block text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                絵文字
+              </label>
+              <div className="mb-6 grid grid-cols-10 gap-2 max-h-48 overflow-y-auto rounded-2xl p-2" style={{ background: 'var(--bg-alt)' }}>
+                {EMOJI_OPTIONS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => setFormData({ ...formData, emoji })}
+                    className="rounded-xl text-2xl transition hover:scale-110 flex items-center justify-center"
+                    style={{
+                      background: formData.emoji === emoji ? 'var(--brand-blue)' : 'transparent',
+                      padding: '8px',
+                      boxShadow: formData.emoji === emoji ? 'var(--shadow-soft)' : 'none',
+                    }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
               </div>
 
               <div className="flex gap-2">
