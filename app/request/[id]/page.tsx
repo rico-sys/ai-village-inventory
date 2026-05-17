@@ -100,6 +100,28 @@ export default function RequestStatusPage() {
     if (!request) return
 
     setActionLoading(true)
+
+    // 楽観的UIアップデート：即座に画面を更新
+    const updatedRequest = {
+      ...request,
+      request_items: request.request_items.map((item) =>
+        item.id === requestItemId
+          ? { ...item, item_status: 'delivered' as const, received_at: new Date().toISOString() }
+          : item
+      ),
+    }
+
+    const allDelivered = updatedRequest.request_items.every(
+      (item) => item.item_status === 'delivered' || item.item_status === 'returned'
+    )
+
+    if (allDelivered) {
+      updatedRequest.status = 'delivered'
+      updatedRequest.delivered_at = new Date().toISOString()
+    }
+
+    setRequest(updatedRequest)
+
     try {
       const supabase = createClient()
 
@@ -115,10 +137,6 @@ export default function RequestStatusPage() {
       if (error) throw error
 
       // 申請全体の状態も確認して更新
-      const allDelivered = request.request_items.every(
-        (item) => item.id === requestItemId || item.item_status === 'delivered' || item.item_status === 'returned'
-      )
-
       if (allDelivered) {
         await supabase
           .from('requests')
@@ -131,6 +149,8 @@ export default function RequestStatusPage() {
     } catch (error) {
       console.error('受取確認エラー:', error)
       alert('受取確認に失敗しました')
+      // エラー時は元のデータを再取得
+      await fetchRequest()
     } finally {
       setActionLoading(false)
     }
@@ -141,14 +161,38 @@ export default function RequestStatusPage() {
     if (!request) return
 
     setActionLoading(true)
+
+    // 対象の物品情報を取得
+    const item = request.request_items.find((ri) => ri.id === requestItemId)
+    if (!item || !item.item) {
+      alert('物品が見つかりません')
+      setActionLoading(false)
+      return
+    }
+
+    // 楽観的UIアップデート：即座に画面を更新
+    const updatedRequest = {
+      ...request,
+      request_items: request.request_items.map((ri) =>
+        ri.id === requestItemId
+          ? { ...ri, item_status: 'return_requested' as const }
+          : ri
+      ),
+    }
+
+    const allReturning = updatedRequest.request_items.every(
+      (item) => item.item_status === 'return_requested' || item.item_status === 'returned'
+    )
+
+    if (allReturning) {
+      updatedRequest.status = 'return_requested'
+      updatedRequest.return_requested_at = new Date().toISOString()
+    }
+
+    setRequest(updatedRequest)
+
     try {
       const supabase = createClient()
-
-      // 対象の物品情報を取得
-      const item = request.request_items.find((ri) => ri.id === requestItemId)
-      if (!item || !item.item) {
-        throw new Error('物品が見つかりません')
-      }
 
       // 在庫を戻す
       const { error: stockError } = await supabase
@@ -182,10 +226,6 @@ export default function RequestStatusPage() {
       if (error) throw error
 
       // 申請全体の状態も確認して更新
-      const allReturning = request.request_items.every(
-        (item) => item.id === requestItemId || item.item_status === 'return_requested' || item.item_status === 'returned'
-      )
-
       if (allReturning) {
         await supabase
           .from('requests')
@@ -212,6 +252,8 @@ export default function RequestStatusPage() {
     } catch (error) {
       console.error('返却依頼エラー:', error)
       alert('返却依頼に失敗しました')
+      // エラー時は元のデータを再取得
+      await fetchRequest()
     } finally {
       setActionLoading(false)
     }
@@ -222,13 +264,28 @@ export default function RequestStatusPage() {
     if (!request) return
 
     setActionLoading(true)
+
+    // 全request_itemsを返却依頼に
+    const deliveredItems = request.request_items.filter(
+      (item) => item.item_status === 'delivered'
+    )
+
+    // 楽観的UIアップデート：即座に画面を更新
+    const updatedRequest = {
+      ...request,
+      status: 'return_requested' as const,
+      return_requested_at: new Date().toISOString(),
+      request_items: request.request_items.map((item) =>
+        item.item_status === 'delivered'
+          ? { ...item, item_status: 'return_requested' as const }
+          : item
+      ),
+    }
+
+    setRequest(updatedRequest)
+
     try {
       const supabase = createClient()
-
-      // 全request_itemsを返却依頼に
-      const deliveredItems = request.request_items.filter(
-        (item) => item.item_status === 'delivered'
-      )
 
       for (const item of deliveredItems) {
         if (!item.item) continue
@@ -291,6 +348,8 @@ export default function RequestStatusPage() {
     } catch (error) {
       console.error('返却依頼エラー:', error)
       alert('返却依頼に失敗しました')
+      // エラー時は元のデータを再取得
+      await fetchRequest()
     } finally {
       setActionLoading(false)
     }
