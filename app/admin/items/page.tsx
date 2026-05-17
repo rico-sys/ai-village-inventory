@@ -22,7 +22,7 @@ export default function AdminItemsPage() {
   const [formData, setFormData] = useState({
     name: '',
     category_id: '',
-    current_stock: 0,
+    total_stock: 0,
   })
 
   useEffect(() => {
@@ -69,17 +69,18 @@ export default function AdminItemsPage() {
     setFormData({
       name: '',
       category_id: categories[0]?.id || '',
-      current_stock: 0,
+      total_stock: 0,
     })
     setShowModal(true)
   }
 
   const handleEdit = (item: ItemWithCategory) => {
     setEditingItem(item)
+    const rentalCount = rentalCounts[item.id] || 0
     setFormData({
       name: item.name,
       category_id: item.category_id || '',
-      current_stock: item.current_stock,
+      total_stock: item.current_stock + rentalCount,
     })
     setShowModal(true)
   }
@@ -88,10 +89,19 @@ export default function AdminItemsPage() {
     try {
       const supabase = createClient()
 
+      // 在庫残数を計算: 在庫総数 - 貸出中
+      const rentalCount = editingItem ? (rentalCounts[editingItem.id] || 0) : 0
+      const currentStock = formData.total_stock - rentalCount
+
+      if (currentStock < 0) {
+        alert('在庫総数が貸出中数より少ない値は設定できません')
+        return
+      }
+
       const data = {
         name: formData.name,
         category_id: formData.category_id || null,
-        current_stock: formData.current_stock,
+        current_stock: currentStock,
       }
 
       if (editingItem) {
@@ -328,38 +338,34 @@ export default function AdminItemsPage() {
               </select>
             </div>
 
+            <Input
+              label="在庫総数"
+              type="number"
+              value={formData.total_stock.toString()}
+              onChange={(e) =>
+                setFormData({ ...formData, total_stock: parseInt(e.target.value) || 0 })
+              }
+              helperText="全体の在庫数（在庫残数 + 貸出中）を入力してください"
+            />
+
             {editingItem && (
               <div className="p-4 rounded-2xl bg-neu-bg-alt">
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-neu-text-muted">在庫総数</span>
-                    <span className="font-bold text-neu-text">
-                      {formData.current_stock + (rentalCounts[editingItem.id] || 0)}個
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neu-text-muted">在庫残数</span>
-                    <span className="font-bold text-neu-text">{formData.current_stock}個</span>
-                  </div>
                   <div className="flex justify-between">
                     <span className="text-neu-text-muted">貸出中</span>
                     <span className="font-bold text-neu-text">
                       {rentalCounts[editingItem.id] || 0}個
                     </span>
                   </div>
+                  <div className="flex justify-between border-t border-neu-shadow-dark pt-2">
+                    <span className="text-neu-text-muted">在庫残数（自動計算）</span>
+                    <span className="font-bold text-neu-text">
+                      {formData.total_stock - (rentalCounts[editingItem.id] || 0)}個
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
-
-            <Input
-              label="在庫残数"
-              type="number"
-              value={formData.current_stock.toString()}
-              onChange={(e) =>
-                setFormData({ ...formData, current_stock: parseInt(e.target.value) || 0 })
-              }
-              helperText="手元にある在庫の数を入力してください"
-            />
           </div>
         </Modal>
       </div>
