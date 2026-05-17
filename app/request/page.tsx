@@ -191,6 +191,28 @@ function RequestPageContent() {
     if (!currentRequest) return
 
     setActionLoading(true)
+
+    // 楽観的UIアップデート：即座に画面を更新
+    const updatedRequest = {
+      ...currentRequest,
+      request_items: currentRequest.request_items.map((item) =>
+        item.id === requestItemId
+          ? { ...item, item_status: 'delivered' as const, received_at: new Date().toISOString() }
+          : item
+      ),
+    }
+
+    const allDelivered = updatedRequest.request_items.every(
+      (item) => item.item_status === 'delivered' || item.item_status === 'returned'
+    )
+
+    if (allDelivered) {
+      updatedRequest.status = 'delivered'
+      updatedRequest.delivered_at = new Date().toISOString()
+    }
+
+    setCurrentRequest(updatedRequest)
+
     try {
       const supabase = createClient()
 
@@ -204,10 +226,6 @@ function RequestPageContent() {
 
       if (error) throw error
 
-      const allDelivered = currentRequest.request_items.every(
-        (item) => item.id === requestItemId || item.item_status === 'delivered' || item.item_status === 'returned'
-      )
-
       if (allDelivered) {
         await supabase
           .from('requests')
@@ -217,13 +235,13 @@ function RequestPageContent() {
           })
           .eq('id', currentRequest.id)
       }
-
-      if (seatNumber) {
-        await fetchCurrentRequest(seatNumber)
-      }
     } catch (error) {
       console.error('受取確認エラー:', error)
       alert('受取確認に失敗しました')
+      // エラー時は元のデータを再取得
+      if (seatNumber) {
+        await fetchCurrentRequest(seatNumber)
+      }
     } finally {
       setActionLoading(false)
     }
@@ -234,13 +252,37 @@ function RequestPageContent() {
     if (!currentRequest) return
 
     setActionLoading(true)
+
+    const item = currentRequest.request_items.find((ri) => ri.id === requestItemId)
+    if (!item || !item.item) {
+      alert('物品が見つかりません')
+      setActionLoading(false)
+      return
+    }
+
+    // 楽観的UIアップデート：即座に画面を更新
+    const updatedRequest = {
+      ...currentRequest,
+      request_items: currentRequest.request_items.map((ri) =>
+        ri.id === requestItemId
+          ? { ...ri, item_status: 'return_requested' as const }
+          : ri
+      ),
+    }
+
+    const allReturning = updatedRequest.request_items.every(
+      (item) => item.item_status === 'return_requested' || item.item_status === 'returned'
+    )
+
+    if (allReturning) {
+      updatedRequest.status = 'return_requested'
+      updatedRequest.return_requested_at = new Date().toISOString()
+    }
+
+    setCurrentRequest(updatedRequest)
+
     try {
       const supabase = createClient()
-
-      const item = currentRequest.request_items.find((ri) => ri.id === requestItemId)
-      if (!item || !item.item) {
-        throw new Error('物品が見つかりません')
-      }
 
       // 在庫を戻す
       const { error: stockError } = await supabase
@@ -273,11 +315,6 @@ function RequestPageContent() {
 
       if (error) throw error
 
-      // 全て返却依頼済みかチェック
-      const allReturning = currentRequest.request_items.every(
-        (item) => item.id === requestItemId || item.item_status === 'return_requested' || item.item_status === 'returned'
-      )
-
       if (allReturning) {
         await supabase
           .from('requests')
@@ -298,13 +335,13 @@ function RequestPageContent() {
           deliveredAt: new Date(currentRequest.delivered_at),
         })
       }
-
-      if (seatNumber) {
-        await fetchCurrentRequest(seatNumber)
-      }
     } catch (error) {
       console.error('返却依頼エラー:', error)
       alert('返却依頼に失敗しました')
+      // エラー時は元のデータを再取得
+      if (seatNumber) {
+        await fetchCurrentRequest(seatNumber)
+      }
     } finally {
       setActionLoading(false)
     }
@@ -315,12 +352,27 @@ function RequestPageContent() {
     if (!currentRequest) return
 
     setActionLoading(true)
+
+    const deliveredItems = currentRequest.request_items.filter(
+      (item) => item.item_status === 'delivered'
+    )
+
+    // 楽観的UIアップデート：即座に画面を更新
+    const updatedRequest = {
+      ...currentRequest,
+      status: 'return_requested' as const,
+      return_requested_at: new Date().toISOString(),
+      request_items: currentRequest.request_items.map((item) =>
+        item.item_status === 'delivered'
+          ? { ...item, item_status: 'return_requested' as const }
+          : item
+      ),
+    }
+
+    setCurrentRequest(updatedRequest)
+
     try {
       const supabase = createClient()
-
-      const deliveredItems = currentRequest.request_items.filter(
-        (item) => item.item_status === 'delivered'
-      )
 
       for (const item of deliveredItems) {
         if (!item.item) continue
@@ -377,13 +429,13 @@ function RequestPageContent() {
           deliveredAt: new Date(currentRequest.delivered_at),
         })
       }
-
-      if (seatNumber) {
-        await fetchCurrentRequest(seatNumber)
-      }
     } catch (error) {
       console.error('返却依頼エラー:', error)
       alert('返却依頼に失敗しました')
+      // エラー時は元のデータを再取得
+      if (seatNumber) {
+        await fetchCurrentRequest(seatNumber)
+      }
     } finally {
       setActionLoading(false)
     }
