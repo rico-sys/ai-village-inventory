@@ -62,6 +62,7 @@ export default function AdminDashboardPage() {
     lowStockItems: [],
   })
   const [loading, setLoading] = useState(true)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     fetchStats()
@@ -89,6 +90,72 @@ export default function AdminDashboardPage() {
       console.error('統計取得エラー:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 貸出データをリセット
+  const handleResetRentalData = async () => {
+    if (!confirm('貸出データをリセットしますか？\n\n削除されるデータ：\n・貸出申請\n・トランザクション履歴\n\n物品、カテゴリ、スタッフは残ります。')) {
+      return
+    }
+
+    setResetting(true)
+    try {
+      const supabase = createClient()
+
+      // request_itemsを削除
+      await supabase.from('request_items').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+      // requestsを削除
+      await supabase.from('requests').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+      // transactionsを削除
+      await supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+      // 在庫を初期値にリセット（current_stockをそのままにしておく）
+      // 必要に応じて在庫を調整してください
+
+      alert('貸出データをリセットしました')
+      fetchStats()
+    } catch (error) {
+      console.error('リセットエラー:', error)
+      alert('リセットに失敗しました')
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  // 全データを削除
+  const handleDeleteAllData = async () => {
+    if (!confirm('⚠️ 警告：全データを削除しますか？\n\nこの操作は取り消せません。\n\n削除されるデータ：\n・すべての貸出申請\n・すべてのトランザクション履歴\n・すべての物品\n・すべてのカテゴリ\n・すべてのスタッフ')) {
+      return
+    }
+
+    const confirmation = prompt('確認のため「削除」と入力してください')
+    if (confirmation !== '削除') {
+      alert('キャンセルしました')
+      return
+    }
+
+    setResetting(true)
+    try {
+      const supabase = createClient()
+
+      // 依存関係の順序で削除
+      await supabase.from('request_items').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      await supabase.from('requests').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      await supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      await supabase.from('items').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      await supabase.from('categories').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      await supabase.from('staff').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+      alert('全データを削除しました')
+      fetchStats()
+    } catch (error) {
+      console.error('削除エラー:', error)
+      alert('削除に失敗しました。依存関係のあるデータが残っている可能性があります。')
+    } finally {
+      setResetting(false)
     }
   }
 
@@ -181,6 +248,46 @@ export default function AdminDashboardPage() {
             </button>
           ))}
         </nav>
+
+        {/* データ管理 */}
+        <div className="mt-8">
+          <div className="mx-1 mb-3 text-[13px] font-medium" style={{ color: 'var(--text-muted)' }}>
+            データ管理
+          </div>
+          <div className="surface-card p-5">
+            <div className="mb-4">
+              <h3 className="mb-1 text-sm font-bold">貸出データをリセット</h3>
+              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                貸出申請とトランザクション履歴を削除します。物品・カテゴリ・スタッフは残ります。
+              </p>
+              <button
+                onClick={handleResetRentalData}
+                disabled={resetting}
+                className="rounded-full px-4 py-2 text-sm font-medium"
+                style={{ background: '#FFF4E0', color: '#B25C2C' }}
+              >
+                {resetting ? 'リセット中...' : '貸出データをリセット'}
+              </button>
+            </div>
+
+            <div className="border-t pt-4" style={{ borderColor: 'var(--border-color)' }}>
+              <h3 className="mb-1 text-sm font-bold" style={{ color: 'var(--danger)' }}>
+                全データを削除
+              </h3>
+              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                ⚠️ すべてのデータを削除します。この操作は取り消せません。
+              </p>
+              <button
+                onClick={handleDeleteAllData}
+                disabled={resetting}
+                className="rounded-full px-4 py-2 text-sm font-medium"
+                style={{ background: '#FCE5E0', color: 'var(--danger)' }}
+              >
+                {resetting ? '削除中...' : '全データを削除'}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
