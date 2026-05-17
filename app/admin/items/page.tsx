@@ -18,11 +18,11 @@ export default function AdminItemsPage() {
   const [editingItem, setEditingItem] = useState<ItemWithCategory | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [rentalCounts, setRentalCounts] = useState<Record<string, number>>({})
   const [formData, setFormData] = useState({
     name: '',
     category_id: '',
     current_stock: 0,
-    low_stock_alert: 0,
   })
 
   useEffect(() => {
@@ -33,16 +33,30 @@ export default function AdminItemsPage() {
     try {
       const supabase = createClient()
 
-      const [itemsRes, categoriesRes] = await Promise.all([
+      const [itemsRes, categoriesRes, requestItemsRes] = await Promise.all([
         supabase.from('items').select('*, category:categories(*)').order('name'),
         supabase.from('categories').select('*').order('name'),
+        supabase
+          .from('request_items')
+          .select('item_id, quantity')
+          .in('item_status', ['pending', 'delivered']),
       ])
 
       if (itemsRes.error) throw itemsRes.error
       if (categoriesRes.error) throw categoriesRes.error
+      if (requestItemsRes.error) throw requestItemsRes.error
+
+      // 貸出中数を計算
+      const counts: Record<string, number> = {}
+      requestItemsRes.data?.forEach((ri) => {
+        if (ri.item_id) {
+          counts[ri.item_id] = (counts[ri.item_id] || 0) + ri.quantity
+        }
+      })
 
       setItems(itemsRes.data || [])
       setCategories(categoriesRes.data || [])
+      setRentalCounts(counts)
     } catch (error) {
       console.error('データ取得エラー:', error)
     } finally {
@@ -56,7 +70,6 @@ export default function AdminItemsPage() {
       name: '',
       category_id: categories[0]?.id || '',
       current_stock: 0,
-      low_stock_alert: 0,
     })
     setShowModal(true)
   }
@@ -67,7 +80,6 @@ export default function AdminItemsPage() {
       name: item.name,
       category_id: item.category_id || '',
       current_stock: item.current_stock,
-      low_stock_alert: item.low_stock_alert,
     })
     setShowModal(true)
   }
@@ -80,7 +92,6 @@ export default function AdminItemsPage() {
         name: formData.name,
         category_id: formData.category_id || null,
         current_stock: formData.current_stock,
-        low_stock_alert: formData.low_stock_alert,
       }
 
       if (editingItem) {
@@ -259,7 +270,7 @@ export default function AdminItemsPage() {
                         </Badge>
                       </div>
                       <p className="text-sm text-neu-text-muted">
-                        在庫: {item.current_stock}個 / アラート閾値: {item.low_stock_alert}個
+                        在庫: {item.current_stock}個 / 貸出中: {rentalCounts[item.id] || 0}個
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -323,15 +334,6 @@ export default function AdminItemsPage() {
               value={formData.current_stock.toString()}
               onChange={(e) =>
                 setFormData({ ...formData, current_stock: parseInt(e.target.value) || 0 })
-              }
-            />
-
-            <Input
-              label="低在庫アラート閾値"
-              type="number"
-              value={formData.low_stock_alert.toString()}
-              onChange={(e) =>
-                setFormData({ ...formData, low_stock_alert: parseInt(e.target.value) || 0 })
               }
             />
           </div>
