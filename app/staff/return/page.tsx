@@ -141,8 +141,8 @@ export default function StaffReturnPage() {
 
       if (error) throw error
 
-      alert('返却を記録しました')
-      fetchBorrowedItems()
+      // 即座に画面から削除（スムーズな体験のため）
+      setBorrowedItems((prev) => prev.filter((i) => i.itemId !== item.itemId))
     } catch (error) {
       console.error('返却エラー:', error)
       alert('返却に失敗しました')
