@@ -132,6 +132,7 @@ export interface Database {
           quantity: number
           item_status: 'pending' | 'delivered' | 'return_requested' | 'returned' | 'cancelled'
           delivered_at: string | null
+          received_at: string | null
           returned_at: string | null
         }
         Insert: {
@@ -141,6 +142,7 @@ export interface Database {
           quantity?: number
           item_status: 'pending' | 'delivered' | 'return_requested' | 'returned' | 'cancelled'
           delivered_at?: string | null
+          received_at?: string | null
           returned_at?: string | null
         }
         Update: {
@@ -150,6 +152,7 @@ export interface Database {
           quantity?: number
           item_status?: 'pending' | 'delivered' | 'return_requested' | 'returned' | 'cancelled'
           delivered_at?: string | null
+          received_at?: string | null
           returned_at?: string | null
         }
       }
