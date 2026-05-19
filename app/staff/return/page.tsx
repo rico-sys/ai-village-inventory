@@ -67,13 +67,13 @@ export default function StaffReturnPage() {
     try {
       const supabase = createClient()
 
-      // このスタッフの全トランザクションを取得
+      // このスタッフの全トランザクションを取得（古い順）
       const { data: transactions, error } = await supabase
         .from('transactions')
         .select('*, item:items(*)')
         .eq('actor_type', 'staff')
         .eq('actor_id', staff.id)
-        .order('timestamp', { ascending: false })
+        .order('timestamp', { ascending: true })
 
       if (error) throw error
 
@@ -88,10 +88,7 @@ export default function StaffReturnPage() {
         if (tx.action === 'out') {
           if (existing) {
             existing.quantity += tx.quantity
-            // より古い借用日時を保持
-            if (tx.timestamp < existing.borrowedAt) {
-              existing.borrowedAt = tx.timestamp
-            }
+            // 古い順に処理しているので、最初のtimestampが最も古い
           } else {
             itemMap.set(tx.item_id!, {
               itemId: tx.item_id!,
